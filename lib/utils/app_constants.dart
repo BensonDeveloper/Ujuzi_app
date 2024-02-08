@@ -7,7 +7,8 @@ class AppConstants {
   static const String BASE_URL = 'https://reqres.in';
   static const String login_url = '/api/login';
 
-  static const grey = Colors.grey;
+  static const appsecondary = Color.fromRGBO(247, 148, 29, 1);
+  // static const appcolor = Color.fromRGBO(0, 121, 52, 1);
   static const white = Colors.white;
   static const black = Colors.black;
   static const transparent = Colors.transparent;

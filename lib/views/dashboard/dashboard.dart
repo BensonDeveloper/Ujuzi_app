@@ -89,8 +89,8 @@ class _DashboardState extends State<Dashboard> {
           ),
         ],
         currentIndex: _selectedIndex,
-        unselectedItemColor: Colors.green,
-        selectedItemColor: Colors.orange,
+        unselectedItemColor: AppConstants.appcolor,
+        selectedItemColor: AppConstants.appsecondary,
         onTap: _onItemTapped,
       ),
     );
@@ -114,8 +114,7 @@ class HomeContent extends StatelessWidget {
         children: [
           Text(
             'Good Afternoon,John Doe',
-            style:
-                hsRegular.copyWith(fontSize: 20, color: AppConstants.appcolor),
+            style: hsRegular.copyWith(fontSize: 25, color: AppConstants.black),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 30),
@@ -193,7 +192,7 @@ class HomeContent extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: AppConstants.white,
+                color: AppConstants.black,
               ),
               textAlign: TextAlign.center,
             ),

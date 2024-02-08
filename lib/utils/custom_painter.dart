@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ujuzi_app/utils/app_constants.dart';
 
 class CustomAppBarPainter extends CustomPainter {
   final double height;
@@ -8,7 +9,7 @@ class CustomAppBarPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     Paint paint = Paint();
-    paint.color = Colors.deepOrangeAccent;
+    paint.color = AppConstants.appsecondary;
     paint.style = PaintingStyle.fill;
 
     Path path = Path();
