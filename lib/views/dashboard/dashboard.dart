@@ -1,11 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:ujuzi_app/utils/app_constants.dart';
 import 'package:ujuzi_app/utils/custom_painter.dart';
+import 'package:ujuzi_app/utils/shared_preference.dart';
 import 'package:ujuzi_app/utils/style.dart';
 import 'package:ujuzi_app/views/farmers/list_farmers.dart';
 import 'package:ujuzi_app/views/profile/profile.dart';
-import 'package:ujuzi_app/views/soiltests/perform_soil_test.dart';
+//import 'package:ujuzi_app/views/soiltests/perform_soil_test.dart';
 import 'package:ujuzi_app/views/soiltests/soil_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:ujuzi_app/views/soiltests/step_form.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({Key? key}) : super(key: key);
@@ -15,6 +20,11 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
+  String userID = '';
+  String userName = '';
+  late Future<void> _fetchDataFuture;
+  List<Map<String, dynamic>> soilTestsData = [];
+  List<Map<String, dynamic>> farmersData = [];
   final PageController _pageController = PageController();
   int _selectedIndex = 0;
 
@@ -25,6 +35,85 @@ class _DashboardState extends State<Dashboard> {
     'Farmers',
     'Profile'
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the future in initState
+    _fetchDataFuture = _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    await fetchUserData();
+    await fetchSoilTestsData();
+    await fetchFarmersData();
+  }
+
+  // Method to fetch user data from shared preferences
+  Future<void> fetchUserData() async {
+    // Fetch user data from shared preferences
+    final userData = await UserPreferences.getUser();
+
+    // Set user data if available
+    setState(() {
+      userID = userData['userId'] ?? '';
+      userName = userData['userName'] ?? '';
+    });
+  }
+
+  Future<void> fetchSoilTestsData() async {
+    String url = AppConstants.BASE_URL + AppConstants.soil_test_url + userID;
+    try {
+      // Make a request to the API endpoint
+      http.Response response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        // Parse the JSON response
+        final Map<String, dynamic> data = json.decode(response.body);
+
+        // Extract soil tests data
+        final List<dynamic> soilTests = data['soil_tests'];
+
+        setState(() {
+          soilTestsData = soilTests.cast<Map<String, dynamic>>();
+        });
+      } else {
+        // Handle error response
+        print(
+            "Failed to fetch soil tests data. Status code: ${response.statusCode}");
+      }
+    } catch (error) {
+      // Handle network or other errors
+      print("An error occurred: $error");
+    }
+  }
+
+  Future<void> fetchFarmersData() async {
+    String url = AppConstants.BASE_URL + AppConstants.farmer_url + userID;
+    try {
+      // Make a request to the API endpoint
+      http.Response response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        // Parse the JSON response
+        final Map<String, dynamic> data = json.decode(response.body);
+
+        // Extract farmers data
+        final List<dynamic> farmers = data['data'];
+
+        setState(() {
+          farmersData = farmers.cast<Map<String, dynamic>>();
+        });
+      } else {
+        // Handle error response
+        print(
+            "Failed to fetch farmers data. Status code: ${response.statusCode}");
+      }
+    } catch (error) {
+      // Handle network or other errors
+      print("An error occurred: $error");
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -63,7 +152,11 @@ class _DashboardState extends State<Dashboard> {
           });
         },
         children: [
-          HomeContent(),
+          HomeContent(
+            userName: userName,
+            soilTestsData: soilTestsData,
+            farmersData: farmersData,
+          ), // Pass soilTestsData and farmersData here
           SoilTest(),
           ListFarmers(),
           Profile(),
@@ -98,27 +191,52 @@ class _DashboardState extends State<Dashboard> {
 }
 
 class HomeContent extends StatelessWidget {
-  final int totalEarnings = 5000;
-  final int soilTestsDone = 20;
-  final int farmersRegistered = 100;
+  final List<Map<String, dynamic>> soilTestsData;
+  final List<Map<String, dynamic>> farmersData;
+  final String userName;
+
+  const HomeContent({
+    Key? key,
+    required this.soilTestsData,
+    required this.farmersData,
+    required this.userName, // Add this line
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final String soilTestsDone = soilTestsData.length.toString();
+    final String farmersRegistered = farmersData.length.toString();
+    final String? totalEarnings = '0'; // Define totalEarnings here
+
     final size = MediaQuery.of(context).size;
     final height = size.height;
     final width = size.width;
+
+    // Get the current time
+    final currentTime = DateTime.now();
+
+    // Define the message based on the time of the day
+    String greetingMessage = '';
+    if (currentTime.hour < 12) {
+      greetingMessage = 'Good Morning,';
+    } else if (currentTime.hour < 18) {
+      greetingMessage = 'Good Afternoon,';
+    } else {
+      greetingMessage = 'Good Evening,';
+    }
+
     return Padding(
       padding: EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Good Afternoon,John Doe',
+            greetingMessage + userName,
             style: hsRegular.copyWith(fontSize: 25, color: AppConstants.black),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 30),
-          _buildTotalEarningsCard(),
+          _buildTotalEarningsCard(totalEarnings), // Pass totalEarnings here
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -126,13 +244,13 @@ class HomeContent extends StatelessWidget {
               _buildDashboardItem(
                 icon: Icons.science,
                 label: 'Soil Tests Done',
-                value: '$soilTestsDone',
+                value: soilTestsDone,
                 color: AppConstants.appcolor,
               ),
               _buildDashboardItem(
                 icon: Icons.people,
                 label: 'Farmers Registered',
-                value: '$farmersRegistered',
+                value: farmersRegistered,
                 color: AppConstants.appcolor,
               ),
             ],
@@ -146,7 +264,8 @@ class HomeContent extends StatelessWidget {
               // Navigate to the PerformSoilTest page
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => PerformSoilTest()),
+                MaterialPageRoute(builder: (context) => ThreeStepPage()),
+                //MaterialPageRoute(builder: (context) => YourWidget()),
               );
             },
             child: Container(
@@ -173,7 +292,8 @@ class HomeContent extends StatelessWidget {
     );
   }
 
-  Widget _buildTotalEarningsCard() {
+  Widget _buildTotalEarningsCard(String? totalEarnings) {
+    // Accept totalEarnings as parameter
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
@@ -198,7 +318,7 @@ class HomeContent extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              '\Ksh $totalEarnings',
+              '\Ksh $totalEarnings', // Use totalEarnings here
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "110156059991",
+    "project_id": "ujuzikilimo-658d6",
+    "storage_bucket": "ujuzikilimo-658d6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:110156059991:android:bb7bc7d51d10fb4d455a12",
+        "android_client_info": {
+          "package_name": "com.ujuzikilimo.farmsuite"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPZANznJssHFv4L3Sm0B42ENoEfYvlhZM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

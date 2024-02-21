@@ -1,10 +1,13 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:ujuzi_app/utils/app_constants.dart';
 import 'package:ujuzi_app/utils/images.dart';
+import 'package:ujuzi_app/utils/shared_preference.dart';
 import 'package:ujuzi_app/utils/style.dart';
 import 'package:ujuzi_app/views/dashboard/dashboard.dart';
 
@@ -22,6 +25,25 @@ TextEditingController passController = TextEditingController();
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>(); // Key for the form
   bool _isLoading = false;
+  bool _loggedIn = false; // New variable to track login status
+
+  @override
+  void initState() {
+    super.initState();
+    checkLoggedIn(); // Check if user is already logged in
+  }
+
+  void checkLoggedIn() async {
+    _loggedIn = await UserPreferences.isLoggedIn();
+    if (_loggedIn) {
+      // If user is already logged in, navigate to dashboard
+      Navigator.pushReplacement(context, MaterialPageRoute(
+        builder: (context) {
+          return const Dashboard();
+        },
+      ));
+    }
+  }
 
   void login(String email, String pass) async {
     setState(() {
@@ -38,8 +60,13 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (response.statusCode == 200) {
+        // Save Info
+        saveUserData(response.body);
+        // Clear form fields
+        emailController.clear();
+        passController.clear();
         // Push to dashboard
-        Navigator.push(context, MaterialPageRoute(
+        Navigator.pushReplacement(context, MaterialPageRoute(
           builder: (context) {
             return const Dashboard();
           },
@@ -48,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: Colors.red,
-            content: Text('Failed'),
+            content: Text('Invalid Credentials Email or Password. Try Again'),
           ),
         );
       }
@@ -63,6 +90,25 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  void saveUserData(String jsonResponse) async {
+    // Parse the JSON string
+    Map<String, dynamic> userData = jsonDecode(jsonResponse);
+
+    // Extract user information
+    String userId = userData['user']['id'].toString();
+    String userName = userData['user']['name'];
+    String userEmail = userData['user']['email'];
+    String userPhone = userData['user']['phone'];
+
+    // Save user data
+    await UserPreferences.saveUser(
+      userId: userId,
+      userName: userName,
+      userEmail: userEmail,
+      userPhone: userPhone,
+    );
   }
 
   bool _obscureText = true;

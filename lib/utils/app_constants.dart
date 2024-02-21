@@ -3,9 +3,20 @@ import 'package:flutter/material.dart';
 class AppConstants {
   static const String APP_NAME = 'APP';
   static const String APP_VERSION = '13.1';
-  static const String COMPANY_NAME = 'Mitigap';
-  static const String BASE_URL = 'https://reqres.in';
+  static const String COMPANY_NAME = 'UjuziKilimo';
+  static const String BASE_URL = 'https://farmsuitedev.ujuzikilimo.com';
   static const String login_url = '/api/login';
+  static const String soil_test_url = '/api/v1/soil-tests/';
+  static const String farmer_url = '/api/farmers/';
+  static const String crops_url = '/api/org-crops/';
+  static const String wards_url = '/api/org-wards/';
+  static const String cig_group_url = '/api/org-cig-group/';
+  static const String create_farmer_url = '/api/create-farmer';
+  static const String create_farm_url = '/api/create-farm';
+  static const String create_soil_test_samples_url =
+      '/api/create-soil-test-samples';
+  static const String complete_soil_test_url = '/api/complete_soil_test';
+  static const String get_farm_url = '/api/get-farms/';
 
   static const appsecondary = Color.fromRGBO(247, 148, 29, 1);
   // static const appcolor = Color.fromRGBO(0, 121, 52, 1);

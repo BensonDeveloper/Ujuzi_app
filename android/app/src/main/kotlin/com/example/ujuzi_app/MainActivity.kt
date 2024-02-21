@@ -1,4 +1,4 @@
-package com.example.ujuzi_app
+package com.ujuzikilimo.farmsuite
 
 import io.flutter.embedding.android.FlutterActivity
 
